@@ -1,0 +1,58 @@
+service: AdaptiveDBName # NOTE: update this with your service name
+
+# You can pin your service to only deploy with a specific Serverless version
+# Check out our docs for more details
+# frameworkVersion: "=X.X.X"
+
+provider:
+  name: aws
+  runtime: nodejs8.10
+
+# you can overwrite defaults here
+  stage: ${opt:stage, self:custom.defaultStage}
+  region: ap-northeast-1
+
+custom:
+  defaultStage: dev
+  defaultRegion: ap-northeast-1
+  stageName:
+    prod: ""
+    dev: -dev
+    stg: -stg
+
+# you can add statements to the Lambda function's IAM Role here
+#  iamRoleStatements:
+#    - Effect: "Allow"
+#      Action:
+#        - "s3:ListBucket"
+#      Resource: { "Fn::Join" : ["", ["arn:aws:s3:::", { "Ref" : "ServerlessDeploymentBucket" } ] ]  }
+#    - Effect: "Allow"
+#      Action:
+#        - "s3:PutObject"
+#      Resource:
+#        Fn::Join:
+#          - ""
+#          - - "arn:aws:s3:::"
+#            - "Ref" : "ServerlessDeploymentBucket"
+#            - "/*"
+
+# you can define service wide environment variables here
+#  environment:
+#    variable1: value1
+
+# you can add CloudFormation resource templates here
+resources:
+  Resources:
+    SampleTable:
+      Type: 'AWS::DynamoDB::Table'
+      Properties:
+        TableName: 'sampleTable${self:custom.stageName.${self:provider.stage}'
+        AttributeDefinitions:
+          - AttributeName: s_id
+            AttributeType: N
+        KeySchema:
+          - AttributeName: s_id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
